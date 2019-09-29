@@ -58,27 +58,18 @@
     clippy::multiple_inherent_impl,
 
     clippy::missing_docs_in_private_items,
-    clippy::unused_imports,
 )]
 //endregion
 #![allow(unused_imports)]
 
 //region: use statements
 use ansi_term::Colour::{Green, Red, Yellow};
-use chrono::offset::Utc;
-use chrono::prelude::*;
-use chrono::DateTime;
-use chrono::Timelike;
-use chrono::{Datelike, Local};
-use unwrap::unwrap;
-//use ansi_term::Style;
-use clap::App; //Arg
-               //use glob::glob;
+use clap::App;
 use filetime::FileTime;
-use serde_derive::{Deserialize, Serialize};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use unwrap::unwrap;
 //endregion
 
 #[allow(clippy::print_stdout, clippy::integer_arithmetic)]
@@ -104,8 +95,8 @@ fn main() {
     let mut opt_first_mtime: Option<FileTime> = None;
 
     //find the newer folder and remove the older folder
-    for entry in fs::read_dir(snippets_dir).unwrap() {
-        let entry = entry.unwrap();
+    for entry in unwrap!(fs::read_dir(snippets_dir)) {
+        let entry = unwrap!(entry);
         let second_folder = entry.path();
         //println!("{:?}",second_folder);
         let second_metadata = unwrap!(fs::metadata(&second_folder));
@@ -115,19 +106,19 @@ fn main() {
         match opt_first_mtime {
             None => {
                 opt_first_folder = Some(second_folder.clone());
-                opt_first_mtime = Some(second_mtime.clone());
+                opt_first_mtime = Some(second_mtime);
             }
             Some(first_mtime) => {
                 if second_mtime > first_mtime {
-                    let first_folder = opt_first_folder.unwrap();
+                    let first_folder = unwrap!(opt_first_folder);
                     println!("delete first: {:?}", first_folder);
-                    std::fs::remove_dir_all(first_folder).unwrap();
+                    unwrap!(std::fs::remove_dir_all(first_folder));
 
                     opt_first_folder = Some(second_folder.clone());
-                    opt_first_mtime = Some(second_mtime.clone());
+                    opt_first_mtime = Some(second_mtime);
                 } else if first_mtime > second_mtime {
                     println!("delete second: {:?}", second_folder);
-                    std::fs::remove_dir_all(second_folder).unwrap();
+                    unwrap!(std::fs::remove_dir_all(second_folder));
                 } else {
                     println!("Error: folders have the same date?");
                 }
