@@ -95,32 +95,36 @@ fn main() {
     let mut opt_first_mtime: Option<FileTime> = None;
 
     //find the newer folder and remove the older folder
+    //but not with dodrio_xxx name
     for entry in unwrap!(fs::read_dir(snippets_dir)) {
         let entry = unwrap!(entry);
         let second_folder = entry.path();
-        //println!("{:?}",second_folder);
-        let second_metadata = unwrap!(fs::metadata(&second_folder));
-        let second_mtime = FileTime::from_last_modification_time(&second_metadata);
-        //println!("{:?}",second_mtime);
+        let second_name = unwrap!(entry.file_name().into_string()).to_lowercase();
+        if !second_name.starts_with("dodrio") {
+            //println!("{:?}",second_folder);
+            let second_metadata = unwrap!(fs::metadata(&second_folder));
+            let second_mtime = FileTime::from_last_modification_time(&second_metadata);
+            //println!("{:?}",second_mtime);
 
-        match opt_first_mtime {
-            None => {
-                opt_first_folder = Some(second_folder.clone());
-                opt_first_mtime = Some(second_mtime);
-            }
-            Some(first_mtime) => {
-                if second_mtime > first_mtime {
-                    let first_folder = unwrap!(opt_first_folder);
-                    println!("delete first: {:?}", first_folder);
-                    unwrap!(std::fs::remove_dir_all(first_folder));
-
+            match opt_first_mtime {
+                None => {
                     opt_first_folder = Some(second_folder.clone());
                     opt_first_mtime = Some(second_mtime);
-                } else if first_mtime > second_mtime {
-                    println!("delete second: {:?}", second_folder);
-                    unwrap!(std::fs::remove_dir_all(second_folder));
-                } else {
-                    println!("Error: folders have the same date?");
+                }
+                Some(first_mtime) => {
+                    if second_mtime > first_mtime {
+                        let first_folder = unwrap!(opt_first_folder);
+                        println!("delete first: {:?}", first_folder);
+                        unwrap!(std::fs::remove_dir_all(first_folder));
+
+                        opt_first_folder = Some(second_folder.clone());
+                        opt_first_mtime = Some(second_mtime);
+                    } else if first_mtime > second_mtime {
+                        println!("delete second: {:?}", second_folder);
+                        unwrap!(std::fs::remove_dir_all(second_folder));
+                    } else {
+                        println!("Error: folders have the same date?");
+                    }
                 }
             }
         }
