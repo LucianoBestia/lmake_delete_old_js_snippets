@@ -1,7 +1,7 @@
 //! **lmake_version_from_date - In cargo.toml writes the version as the date**  
-//region: lmake_readme insert "readme.md"
+// region: lmake_readme include "readme.md" //! A
 
-//endregion: lmake_readme insert "readme.md"
+// endregion: lmake_readme include "readme.md" //! A
 
 //region: Clippy
 #![warn(
